@@ -1,0 +1,26 @@
+{
+  "name": "minimal-interface-design-mcp",
+  "version": "0.1.0",
+  "description": "A lightweight MCP server and agent skill for thoughtful interface design",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nttare0/all-.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nttare0/all-/issues"
+  },
+  "homepage": "https://github.com/nttare0/all-#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}
