@@ -4,6 +4,7 @@
   "description": "A lightweight MCP server and agent skill for thoughtful interface design",
   "scripts": {
     "start": "node src/index.js",
+    "start:http": "node src/http.js",
     "test": "node --test"
   },
   "repository": {
