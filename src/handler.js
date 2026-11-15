@@ -9,7 +9,7 @@ const list = value => (value ? value.split(',').map(v => v.trim()).filter(Boolea
  * Stateless: a fresh McpServer and transport are created per request, so the same
  * handler works from a long-running process or a serverless function.
  */
-export function createNodeHandler({ authToken, allowedOrigins, allowedHosts, jsonResponses = false } = {}) {
+export function createNodeHandler({ authToken, allowedOrigins, allowedHosts, jsonResponses = false, bridge } = {}) {
   const origins = list(allowedOrigins) ?? ['*'];
   const allowAllOrigins = origins.includes('*');
 
@@ -66,7 +66,7 @@ export function createNodeHandler({ authToken, allowedOrigins, allowedHosts, jso
 
     for (const [key, value] of Object.entries(corsHeaders(req))) res.setHeader(key, value);
 
-    const mcp = createServer();
+    const mcp = createServer({ bridge, eagerBridge: Boolean(bridge) });
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined, // stateless
       enableJsonResponse: jsonResponses,
@@ -80,6 +80,7 @@ export function createNodeHandler({ authToken, allowedOrigins, allowedHosts, jso
     });
 
     try {
+      await mcp.bridgeReady; // no-op unless a bridge is attached
       await mcp.connect(transport);
       await transport.handleRequest(req, res);
     } catch (error) {

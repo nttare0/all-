@@ -101,3 +101,26 @@ test('stdio and HTTP transports expose identical tool definitions', async () => 
   const stdioTools = server._registeredTools ? Object.keys(server._registeredTools).sort() : [];
   assert.deepEqual(stdioTools, ['design_brief', 'design_review_checklist']);
 });
+
+test('serial bridge tools are reachable over HTTP too', async () => {
+  const { fileURLToPath } = await import('node:url');
+  const { createSerialBridge } = await import('../src/bridge.js');
+  const fakeServerPath = fileURLToPath(new URL('./fixtures/fake-serial-server.js', import.meta.url));
+  const bridge = createSerialBridge({ command: process.execPath, args: [fakeServerPath] });
+  try {
+    await withHttpServer({ bridge }, async ({ url }) => {
+      const client = await connect(url);
+      try {
+        await new Promise(resolve => setTimeout(resolve, 400));
+        const { tools } = await client.listTools();
+        assert.ok(tools.some(t => t.name === 'serial_list_ports'), 'bridged tools should be listed');
+        const ports = await client.callTool({ name: 'serial_list_ports', arguments: {} });
+        assert.match(ports.content[0].text, /ttyACM0/);
+      } finally {
+        await client.close();
+      }
+    });
+  } finally {
+    await bridge.close();
+  }
+});
